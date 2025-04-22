@@ -31,7 +31,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_D2s_v3",
+      "defaultValue": "Standard_D4s_v3",
       "metadata": {
         "description": "The size of the VM"
       }
@@ -251,6 +251,42 @@
               "lun": 3,
               "name": "data02_02",
               "diskSizeGB": 2,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            },
+            {
+              "lun": 4,
+              "name": "data02_03",
+              "diskSizeGB": 2,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            },
+            {
+              "lun": 5,
+              "name": "data02_04",
+              "diskSizeGB": 2,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            },
+             {
+              "lun": 6,
+              "name": "data03_01",
+              "diskSizeGB": 3,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Standard_LRS"
+              }
+            },
+             {
+              "lun": 7,
+              "name": "data03_02",
+              "diskSizeGB": 3,
               "createOption": "Empty",
               "managedDisk": {
                 "storageAccountType": "Standard_LRS"
