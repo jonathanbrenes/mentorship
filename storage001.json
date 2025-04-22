@@ -97,7 +97,7 @@
               "destinationPortRange": "22",
               "direction": "Inbound",
               "priority": 100,
-              "Protocol": "TCP",
+              "protocol": "TCP",
               "sourceAddressPrefix": "Internet",
               "sourcePortRange": "*"
             }
@@ -245,8 +245,9 @@
               "createOption": "Empty",
               "managedDisk": {
                 "storageAccountType": "Standard_LRS"
-              },
-              {
+              }
+            },
+            {
               "lun": 3,
               "name": "data02_02",
               "diskSizeGB": 2,
