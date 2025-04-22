@@ -44,6 +44,7 @@
     "imageOffer": "sles-15-sp6",
     "imageSKU": "gen1",
     "imageVersion": "latest",
+    "customData": "dmdjcmVhdGUgdmdkYXRhMDEgL2Rldi9kaXNrL2F6dXJlL3Njc2kxL2x1bjAKbHZjcmVhdGUgLUwyRyAvZGV2L3ZnZGF0YTAxIC1uIGx2ZGF0YTAxCnZnY3JlYXRlIHZnZGF0YTAyIC9kZXYvZGlzay9henVyZS9zY3NpMS9sdW5bMi0zXQpsdmNyZWF0ZSAgLWkyIC1MMUcgLW4gbHZkYXRhMDIgdmdkYXRhMDIKdmdjcmVhdGUgdmdkYXRhMDMgL2Rldi9kaXNrL2F6dXJlL3Njc2kxL2x1bls2LTddCmx2Y3JlYXRlIC1MMkcgLW0xIC1uIGx2ZGF0YTAzIHZnZGF0YTAz",
     "location": "[resourceGroup().location]",
     "virtualNetworkName": "[format('{0}vnet', parameters('vmName'))]",
     "addressPrefix": "10.1.0.0/16",
@@ -304,7 +305,8 @@
         "osProfile": {
           "computerName": "[parameters('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminPassword": "[parameters('adminPassword')]",
+          "customData": "[variables('customData')]"
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
