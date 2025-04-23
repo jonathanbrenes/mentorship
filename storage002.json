@@ -11,7 +11,7 @@
   "parameters": {
     "vmName": {
       "type": "string",
-      "defaultValue": "storage01",
+      "defaultValue": "storage02",
       "metadata": {
         "description": "The name of you Virtual Machine."
       }
@@ -40,7 +40,7 @@
   "functions": [],
   "variables": {
     "osDiskType": "Premium_LRS",
-    "imagePublisher": "SUSE",
+    "imagePublisher": "canonical",
     "imageOffer": "0001-com-ubuntu-server-jammy",
     "imageSKU": "22_04-lts-gen2",
     "imageVersion": "latest",
@@ -220,7 +220,6 @@
             "version": "[variables('imageVersion')]"
           },
           "diskControllerType": "NVMe"
-          ]
         },
         "networkProfile": {
           "networkInterfaces": [
