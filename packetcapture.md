@@ -26,4 +26,26 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   ```
   > **Note:** This will open a pop out window asking for permission. Please accept it!
 
-- Donwload the file and open it using wireshark
+- Download the file and open it using wireshark
+
+- Make another capture again with tcpdump, don't use any filter this time
+  ``` bash
+  tcpdump -i any port 80 # Captures network traffic on port 80 from all interfaces.
+  ```
+
+- Download the new file on windows
+  
+  Filtering is possible on wireshark
+  
+  | **Filter Description**                           | **Wireshark Filter**                  |
+  |--------------------------------------------------|---------------------------------------|
+  | Filter traffic on port 80 (HTTP traffic)         | `tcp.port == 80`                      |
+  | Filter traffic from a specific IP address        | `ip.src == 192.168.1.1`               |
+  | Filter traffic to a specific IP address          | `ip.dst == 192.168.1.1`               |
+  | Filter HTTP traffic from a specific IP address   | `tcp.port == 80 && ip.src == 192.168.1.1` |
+  | Filter HTTP traffic to a specific IP address     | `tcp.port == 80 && ip.dst == 192.168.1.1` |
+  | Filter all traffic from a specific subnet        | `ip.src == 192.168.1.0/24`            |
+  | Filter all traffic to a specific subnet          | `ip.dst == 192.168.1.0/24`            |
+  | Filter traffic for a specific TCP port range     | `tcp.port >= 1000 && tcp.port <= 2000`|
+  | Filter traffic for a specific UDP port           | `udp.port == 53`                      |
+  | Filter traffic for a specific MAC address        | `eth.addr == 00:11:22:33:44:55`       |
