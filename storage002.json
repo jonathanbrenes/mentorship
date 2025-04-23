@@ -219,7 +219,27 @@
             "sku": "[variables('imageSKU')]",
             "version": "[variables('imageVersion')]"
           },
-          "diskControllerType": "NVMe"
+          "diskControllerType": "NVMe",
+          "dataDisks": [
+            {
+              "lun": 0,
+              "name": "data01_01",
+              "diskSizeGB": 4,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              }
+            },
+            {
+              "lun": 1,
+              "name": "data01_02",
+              "diskSizeGB": 4,
+              "createOption": "Empty",
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              }
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
