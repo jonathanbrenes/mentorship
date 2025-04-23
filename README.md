@@ -36,4 +36,13 @@
   lsblk  -f
   nvme list
   ls -l /dev/disk/azure/scsi1
+  ls -l /dev/disk/azure
+  ```
+- List the block device using ```lsblk -f```
+- List all nvme controllers using ```nvme list```
+- List the files and symlinks on ```/dev/disk/azure```
+  > You may found the previous symlinks are missing
+- For this purpose we are going to install a new udev rule available [here](https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules)
+  ```bash
+  wget https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules -O /etc/udev/rules.d/80-azure-disk.rules
   ```
