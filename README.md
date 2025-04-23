@@ -26,8 +26,8 @@
     > Another problem? How can you solve this?
   - Add the new LUNs 8 and 9 to ```vgdata03``` and extend  ```/dev/vgdata02/lvdata03```.
 
-## Storage / LVM
-  Deploy this VM. This will automatically create a VM and set an initial LVM/filesystem structure.
+## Storage / NVME
+  Deploy this VM. This will automatically create a VM which uses NVME for all disks.
    
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fstorage002.json)
 
@@ -46,3 +46,4 @@
   ```bash
   wget https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules -O /etc/udev/rules.d/80-azure-disk.rules
   ```
+- Check again ```/dev/disk/azure```
