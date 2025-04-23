@@ -48,4 +48,4 @@
   ```bash
   wget https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules -O /etc/udev/rules.d/80-azure-disk.rules
   ```
-- Check again ```/dev/disk/azure```
+- Reboot and check again ```/dev/disk/azure```
