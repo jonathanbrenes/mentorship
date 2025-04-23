@@ -10,6 +10,7 @@
   lvs -o +devices
   ls -l /dev/disk/azure/scsi1
   ```
+
   - Extend ```/dev/vgdata01/lvdata01``` to use all available space on the volume group ```vgdata01```.
   - Extend ```/dev/vgdata01/lvdata01```, this time adding ```/dev/disk/azure/scsi1/lun1``` to ```vgdata01```.
     > **Don't resize the filesystem yet!**
@@ -38,10 +39,11 @@
   ls -l /dev/disk/azure/scsi1
   ls -l /dev/disk/azure
   ```
+
 - List the block device using ```lsblk -f```
 - List all nvme controllers using ```nvme list```
 - List the files and symlinks on ```/dev/disk/azure```
-  > You may found the previous symlinks are missing
+  > You may found the previous symlinks and files are missing
 - For this purpose we are going to install a new udev rule available [here](https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules)
   ```bash
   wget https://raw.githubusercontent.com/Azure/azure-vm-utils/refs/heads/main/udev/80-azure-disk.rules -O /etc/udev/rules.d/80-azure-disk.rules
