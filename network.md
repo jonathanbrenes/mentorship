@@ -85,5 +85,6 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
   >**Note:** Why this time network configuration doesn't look correct?
 
 - Setting multinic configuration on RHEL
+- 
   Follow up public documentation and set the proper multinic configuration on RHEL [Configure multiple network interfaces in Azure Linux virtual machines](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/linux/linux-vm-multiple-virtual-network-interfaces-configuration?tabs=1subnet%2Crhel8)
 
