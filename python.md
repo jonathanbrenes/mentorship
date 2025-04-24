@@ -1,7 +1,7 @@
 # Python
 ## Enhanced Performance in Python 3.6 vs 3.11
-### Create a SLES 15 server which it will have python 3.6 and 3.11 
-Deploy this VM. This will automatically create a VM.
+- Create a SLES 15 server which it will have python 3.6 and 3.11 
+  Deploy this VM. This will automatically create a VM.
   
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython001.json)
   
