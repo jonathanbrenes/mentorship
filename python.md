@@ -17,7 +17,7 @@ Deploy this VM. This will automatically create a VM.
   ```
  > **Note:** Result of the script will be faster with 3.11. That's one of reasons everybody is moving to newest python version
 
-### Python Virtual Environment
+## Python Virtual Environment
 - Set a [Python Virtual Environment](https://docs.python.org/3/library/venv.html)
   Create an environment for python 3.6 and another one for python 3.11
   ```bash
