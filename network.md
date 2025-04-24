@@ -53,11 +53,17 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
 
 
 ### Multinic configuration
-Deploy this VM. This will automatically create a SLES VM with multinic configuration on place
+Deploy this VM. This will automatically create a SLES VM that will be configure for multinic.
   
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
 - Check network configuration
   Important commands
   ```bash
   ip address show
+  ip route show
+  ip rule show
   ```
+- Attach secondary NIC to VM
+  Power off the VM, attach network interface. There is already a created network interface on the same resource group. Power on the VM
+
+- Check network configuration using the same commands
