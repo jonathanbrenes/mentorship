@@ -11,7 +11,7 @@
   "parameters": {
     "vmName": {
       "type": "string",
-      "defaultValue": "storage01",
+      "defaultValue": "storage001",
       "metadata": {
         "description": "The name of you Virtual Machine."
       }
