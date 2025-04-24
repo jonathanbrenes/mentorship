@@ -3,7 +3,7 @@
 ### Create a server running a webserver
 Deploy this VM. This will automatically create a VM and set a webserver running on port 80
   
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpacketcapture.json)
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork001.json)
 - Capture traffic on port 80. Access the VM public IP from a webbrowser, once the test is done, hit ```Ctrl-C``` to stop the capture
   ``` bash
   tcpdump -i any port 80 and not host 168.63.129.16 # Captures network traffic on port 80 from all interfaces while excluding traffic from the IP address 168.63.129.16 which could be sending health probes to the VM.
@@ -50,3 +50,14 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   | Filter traffic for a specific TCP port range     | `tcp.port >= 1000 && tcp.port <= 2000`|
   | Filter traffic for a specific UDP port           | `udp.port == 53`                      |
   | Filter traffic for a specific MAC address        | `eth.addr == 00:11:22:33:44:55`       |
+
+
+### Multinic configuration
+Deploy this VM. This will automatically create a SLES VM with multinic configuration on place
+  
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
+- Check network configuration
+  Important commands
+  ```bash
+  ip address show
+  ```
