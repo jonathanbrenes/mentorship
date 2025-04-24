@@ -8,3 +8,4 @@
 ## Network
 
 ### [Packet capture](https://github.com/jonathanbrenes/mentorship/blob/main/network.md#packet-capture)
+### [Multinic configuration](https://github.com/jonathanbrenes/mentorship/blob/main/network.md#multinic-configuration)
