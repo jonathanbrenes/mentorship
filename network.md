@@ -79,12 +79,14 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
   ip rule show
   ```
 - Attach secondary NIC to VM
+  
   Power off the VM, attach network interface. There is already a created network interface on the same resource group. Power on the VM
 
 - Check network configuration using the same commands
+  
   >**Note:** Why this time network configuration doesn't look correct?
 
 - Setting multinic configuration on RHEL
-- 
+  
   Follow up public documentation and set the proper multinic configuration on RHEL [Configure multiple network interfaces in Azure Linux virtual machines](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/linux/linux-vm-multiple-virtual-network-interfaces-configuration?tabs=1subnet%2Crhel8)
 
