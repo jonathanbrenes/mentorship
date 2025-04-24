@@ -1,0 +1,274 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1.14562",
+      "templateHash": "16607361201936431976"
+    }
+  },
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "network001",
+      "metadata": {
+        "description": "The name of you Virtual Machine."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "secureString",
+      "metadata": {
+        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v3",
+      "metadata": {
+        "description": "The size of the VM"
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "osDiskType": "StandardSSD_LRS",
+    "imagePublisher": "SUSE",
+    "imageOffer": "sles-15-sp6",
+    "imageSKU": "gen1",
+    "imageVersion": "latest",
+    "location": "[resourceGroup().location]",
+    "virtualNetworkName": "[format('{0}vnet', parameters('vmName'))]",
+    "addressPrefix": "10.1.0.0/16",
+    "subnetName": "[format('{0}NSG', parameters('vmName'))]",
+    "subnetAddressPrefix": "10.1.0.0/24",
+    "networkSecurityGroupName": "[format('{0}subnet', parameters('vmName'))]",
+    "networkInterfaceName": "[format('{0}NetInt', parameters('vmName'))]",
+    "publicIPAddressName": "[format('{0}PublicIP', parameters('vmName'))]",
+    "dnsLabelPrefix": "[concat(parameters('vmName'), uniqueString(resourceGroup().id))]",
+    "customData": "IyEvYmluL2Jhc2gKZWNobyAiYVcxd2IzSjBJSFJwYldVS2FXMXdiM0owSUcxaGRHZ0tDbVJsWmlCdVltOWtlU2hzYjI5d2N5d2dZbTlrYVdWektUb0tJQ0FnSUdadgpjaUJmSUdsdUlISmhibWRsS0d4dmIzQnpLVG9LSUNBZ0lDQWdJQ0JoWkhaaGJtTmxLREF1TURFc0lHSnZaR2xsY3lrS0NtUmxaaUJoClpIWmhibU5sS0dSMExDQmliMlJwWlhNcE9nb2dJQ0FnWm05eUlHSnZaSGt4SUdsdUlHSnZaR2xsY3pvS0lDQWdJQ0FnSUNCbWIzSWcKWW05a2VUSWdhVzRnWW05a2FXVnpPZ29nSUNBZ0lDQWdJQ0FnSUNCcFppQmliMlI1TVNCcGN5QnViM1FnWW05a2VUSTZDaUFnSUNBZwpJQ0FnSUNBZ0lDQWdJQ0JrZUNBOUlHSnZaSGt4V3lkNEoxMGdMU0JpYjJSNU1sc25lQ2RkQ2lBZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0JrCmVTQTlJR0p2WkhreFd5ZDVKMTBnTFNCaWIyUjVNbHNuZVNkZENpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCa2VpQTlJR0p2WkhreFd5ZDYKSjEwZ0xTQmliMlI1TWxzbmVpZGRDaUFnSUNBZ0lDQWdJQ0FnSUNBZ0lDQmthWE4wWVc1alpTQTlJRzFoZEdndWMzRnlkQ2hrZUNBcQpJR1I0SUNzZ1pIa2dLaUJrZVNBcklHUjZJQ29nWkhvcENpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCdFlXY2dQU0JrZENBdklDaGthWE4wCllXNWpaU0FxSUdScGMzUmhibU5sSUNvZ1pHbHpkR0Z1WTJVcENpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCaWIyUjVNVnNuZG5nblhTQXQKUFNCa2VDQXFJRzFoWndvZ0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnWW05a2VURmJKM1o1SjEwZ0xUMGdaSGtnS2lCdFlXY0tJQ0FnSUNBZwpJQ0FnSUNBZ0lDQWdJR0p2WkhreFd5ZDJlaWRkSUMwOUlHUjZJQ29nYldGbkNnb2dJQ0FnWm05eUlHSnZaSGtnYVc0Z1ltOWthV1Z6Ck9nb2dJQ0FnSUNBZ0lHSnZaSGxiSjNnblhTQXJQU0JrZENBcUlHSnZaSGxiSjNaNEoxMEtJQ0FnSUNBZ0lDQmliMlI1V3lkNUoxMGcKS3owZ1pIUWdLaUJpYjJSNVd5ZDJlU2RkQ2lBZ0lDQWdJQ0FnWW05a2VWc25laWRkSUNzOUlHUjBJQ29nWW05a2VWc25kbm9uWFFvSwpJeUJFWldacGJtVWdkR2hsSUdObGJHVnpkR2xoYkNCaWIyUnBaWE1LWW05a2FXVnpJRDBnV3dvZ0lDQWdleWQ0SnpvZ01DNHdMQ0FuCmVTYzZJREF1TUN3Z0ozb25PaUF3TGpBc0lDZDJlQ2M2SURBdU1Dd2dKM1o1SnpvZ01DNHdMQ0FuZG5vbk9pQXdMakFzSUNkdFlYTnoKSnpvZ01TNHdmU3dLSUNBZ0lIc25lQ2M2SURFdU1Dd2dKM2tuT2lBd0xqQXNJQ2Q2SnpvZ01DNHdMQ0FuZG5nbk9pQXdMakFzSUNkMgplU2M2SURFdU1Dd2dKM1o2SnpvZ01DNHdMQ0FuYldGemN5YzZJREF1TURBeGZTd0tJQ0FnSUhzbmVDYzZJREF1TUN3Z0oza25PaUF4CkxqQXNJQ2Q2SnpvZ01DNHdMQ0FuZG5nbk9pQXRNUzR3TENBbmRua25PaUF3TGpBc0lDZDJlaWM2SURBdU1Dd2dKMjFoYzNNbk9pQXcKTGpBd01YMHNDbDBLQ2lNZ1RXVmhjM1Z5WlNCd1pYSm1iM0p0WVc1alpTQm1iM0lnZEdobElHTjFjbkpsYm5RZ1VIbDBhRzl1SUhabApjbk5wYjI0S2MzUmhjblJmZEdsdFpTQTlJSFJwYldVdWRHbHRaU2dwQ201aWIyUjVLRGt3TURBd01Dd2dZbTlrYVdWektTQWdJeUJKCmJtTnlaV0Z6WlNCMGFHVWdiblZ0WW1WeUlHOW1JR3h2YjNCeklIUnZJRzFoYTJVZ2RHaGxJSFJsYzNRZ2RHaHlaV1VnZEdsdFpYTWcKYkc5dVoyVnlDbVZ1WkY5MGFXMWxJRDBnZEdsdFpTNTBhVzFsS0NrS1pYaGxZM1YwYVc5dVgzUnBiV1VnUFNCbGJtUmZkR2x0WlNBdApJSE4wWVhKMFgzUnBiV1VLQ25CeWFXNTBLR1lpUlhobFkzVjBhVzl1SUhScGJXVTZJSHRsZUdWamRYUnBiMjVmZEdsdFpYMGdjMlZqCmIyNWtjeUlwQ2dvPSIgfCBiYXNlNjQgLWQgPiAvdXNyL2xvY2FsL2Jpbi9uYm9keS5weQ=="
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('networkInterfaceName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "inbound_ssh",
+            "properties": {
+              "access": "Allow",
+              "description": "Inbound SSH access to port 22.",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 100,
+              "Protocol": "TCP",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-101",
+            "properties": {
+              "access": "Allow",
+              "description": "CSS Governance Security Rule.  Allow vnet inbound.  https://aka.ms/casg",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 101,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-102",
+            "properties": {
+              "access": "Allow",
+              "description": "CSS Governance Security Rule.  Allow Corpnet inbound.  https://aka.ms/casg",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 102,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "CorpNetPublic",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-103",
+            "properties": {
+              "access": "Allow",
+              "description": "AllowTagSSHInbound",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 103,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "AzureCloud",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "inbound_http",
+            "properties": {
+              "access": "Allow",
+              "description": "Inbound HTTP access to port 80.",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80",
+              "direction": "Inbound",
+              "priority": 104,
+              "protocol": "TCP",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}/{1}', variables('virtualNetworkName'), variables('subnetName'))]",
+      "properties": {
+        "addressPrefix": "[variables('subnetAddressPrefix')]",
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsLabelPrefix')]"
+        },
+        "idleTimeoutInMinutes": 4
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-03-01",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            }
+          },
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "[variables('imageVersion')]"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "customData": "[variables('customData')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "hostname": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]"
+    }
+  }
+}
