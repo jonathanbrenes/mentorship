@@ -22,7 +22,7 @@
   Create an environment for python 3.6 and another one for python 3.11
   ```bash
   python3.6 -m venv p36env # Create python virtual environment for version 3.6 inside p36env directory
-  python3.11 -m venv p36env # Create python virtual environment for version 3.11 inside p311env directory
+  python3.11 -m venv p311env # Create python virtual environment for version 3.11 inside p311env directory
   source p36env/bin/activate # Activate virtual environment for 3.6
   python3 --version # This will return version 3.6
   source p311env/bin/activate # Activate virtual environment for 3.11
