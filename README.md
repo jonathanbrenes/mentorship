@@ -14,3 +14,7 @@
 ## Python
 ### [Enhanced Performance in Python 3.6 vs 3.11](https://github.com/jonathanbrenes/mentorship/blob/main/python.md#enhanced-performance-in-python-36-vs-311)
 ### [Python Virtual Environment](https://github.com/jonathanbrenes/mentorship/blob/main/python.md#python-virtual-environment)
+
+
+## SELinux
+### [Fix webserver blocked by SELinux](https://github.com/jonathanbrenes/mentorship/blob/main/selinux.md)
