@@ -50,7 +50,7 @@ Make sure you can connect the server using the configured port used by httpd
 
 - Check again ```/var/log/messages```. Find more SELinux errors
   ```bash
-  grep -i selinux /var/log/messages
+  grep SELinux /var/log/messages
   ```
 
 - Using the information provided by setroubleshoot, fix the problem
