@@ -1,6 +1,5 @@
-
 # SELinux  
-## HTTPD & SELinux Context  
+## Fix webserver blocked by SELinux
 ### Create a server running a webserver with SELinux enabled
 
 Deploy this VM. This ARM template will automatically create a **RHEL 9.4 VM**, install **httpd**, configure the firewall, and deploy a sample HTML page. This environment is used to demonstrate **SELinux port labeling, file contexts, and httpd permissions**.
@@ -42,6 +41,8 @@ Deploy this VM. This ARM template will automatically create a **RHEL 9.4 VM**, i
 - Using the information provided by setroubleshoot create a new local policy to allow the tcp port
 
 - Once fixed restart the httpd service
+
+
 
 ### Fix File Context Demonstration
 
