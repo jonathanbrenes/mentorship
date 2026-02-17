@@ -139,7 +139,7 @@ Students must:
   ```
 - Use **one single-line Python command**
 - Run the service as a **new user called `webserver`**
-- Serve files from `/var/www/`
+- Serve files from `/var/www/html/`
 - Ensure the service:
   - Starts successfully
   - Can be restarted
