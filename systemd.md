@@ -240,6 +240,7 @@ If the service fails to start, students should investigate:
 - Whether the selected port requires elevated privileges
 - systemd unit syntax errors
 - Check firewall and SELinux
+- Check Red Hat documentation https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/using_systemd_unit_files_to_customize_and_optimize_your_system/working-with-systemd-unit-files
 
 
 ### Expected learning outcomes
