@@ -29,9 +29,9 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
 
 - Download the file and open it using wireshark
 
-- Make another capture again with tcpdump, don't use any filter this time
+- Make another capture again with tcpdump, don't use any filter this time. Access the webserver again, click refresh few times. Access the VM public IP from a webbrowser, once the test is done, hit ```Ctrl-C``` to stop the capture
   ``` bash
-  tcpdump -i any port 80 # Captures network traffic on port 80 from all interfaces.
+  tcpdump -w mycapture2.pcap -i any port 80 # Captures network traffic on port 80 from all interfaces.
   ```
 
 - Download the new file on windows
