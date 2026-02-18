@@ -200,7 +200,9 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 ### Part 5: Increase MTU Size
 - Azure supports larger MTU values **only for traffic within the same VNet**.
   Students must follow:
-   - Configure MTU for virtual machines for Linux  https://learn.microsoft.com/azure/virtual-network/how-to-virtual-machine-mtu
+   - Configure MTU for each secondary NIC on both virtual machines
+     - https://access.redhat.com/solutions/5846031
+     - https://learn.microsoft.com/azure/virtual-network/how-to-virtual-machine-mtu
 
   Key points from the documentation:
     - Default MTU: 1500
@@ -211,7 +213,7 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 
   Tasks:
     - Identify supported MTU based on NIC type
-    - Increase MTU on both VMs
+    - Increase MTU on both VMs on the secondary NIC
     - Persist MTU configuration using NetworkManager
 
   Validation commands:
@@ -227,8 +229,6 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 
   - Tasks:
       - Run the script from client → webserver
-      - Identify maximum supported payload size
-      - Calculate effective MTU (payload + headers)
       - Confirm it matches configured MTU
 
   - This step ensures:
