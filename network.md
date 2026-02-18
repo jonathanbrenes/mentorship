@@ -51,8 +51,9 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   | Filter traffic for a specific UDP port           | `udp.port == 53`                      |
   | Filter traffic for a specific MAC address        | `eth.addr == 00:11:22:33:44:55`       |
 
+---
 
-### Multinic configuration
+## Multinic configuration
 Deploy this VM. This will automatically create a SLES VM that will be configure for multinic.
   
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
@@ -87,6 +88,8 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
   >**Note:** Why this time network configuration doesn't look correct?
 
 - Setting multinic configuration on RHEL
+
+---
 
 ## Multinic, Accelerated Networking, and MTU on Azure (RHEL 9)
 
