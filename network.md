@@ -9,12 +9,6 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   tcpdump -i any port 80 and not host 168.63.129.16 # Captures network traffic on port 80 from all interfaces while excluding traffic from the IP address 168.63.129.16 which could be sending health probes to the VM.
   ```
 
-  <details>
-     <summary>Screenshot: Capture traffic for port 80, exclude from the Wire server</summary>
-
-	<img src="./.attachments/lab10image39.png" alt="Check for updates." size=950x>
-  </details> 
-
   > **Note:** The parameter ```-w``` can be used to save the capture in a pcap file. Caoture the file!
   ``` bash
    tcpdump -w mycapture.pcap -i any port 80 and not host 168.63.129.16
@@ -254,4 +248,196 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 
 This exercise mirrors real Azure support and production scenarios.
 
-  
+## Alternative Multinic Configuration Using NetworkManager Policy Routing (RHEL 9)
+### Objective
+  - This section describes an alternative multinic configuration technique using NetworkManager policy-based routing.
+
+    The goal of this approach is to:
+      - Maintain linear traffic paths between servers
+        - eth0 → eth0
+        - eth1 → eth1
+      - Use separate routing tables per interface
+      - Preserve Accelerated Networking behavior
+      - Increase MTU only on the secondary interface used for intra-VNet traffic
+
+    This configuration is intended to complement the previous multinic exercise and demonstrate a different implementation method using nmcli.
+
+### Determine Interface Addresses
+  - Before configuring routing tables, students must identify the IP address assigned to each NIC.
+    Run the following command on both virtual machines:
+	 
+       ```bash
+ 	   ip a | grep eth
+ 	   ```
+
+    Example output:
+    
+       ```bash
+       2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
+       inet 10.1.0.5/24 scope global eth0
+       3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
+       inet 10.1.0.6/24 scope global eth1
+       ```
+    **Important:** Record both addresses for later routing rules
+      - eth0 = primary NIC
+      - eth1 = secondary NIC used for accelerated intra-VNet communication
+
+    
+
+### Rename Secondary Network Profile
+  - In Azure deployments, the second interface may appear as Wired connection 1.
+    ```bash
+    nmcli connection modify "Wired connection 1" connection.id "System eth1"
+    ```
+    
+### Why Routes and Routing Rules Are Required
+  - Azure attaches multiple NICs to the same subnet, but Linux routing decisions are based on the main routing table by default.
+  - Without policy routing:
+     - The system chooses only one default route.
+     - Return traffic may exit through a different NIC than the one used for ingress.
+     - Asymmetric routing can occur, causing dropped packets or degraded performance.
+     - Accelerated Networking paths may not be preserved.
+
+   - This configuration solves the problem using policy-based routing:
+     - Routing Table 100 is associated with eth0.
+     - Routing Table 200 is associated with eth1.
+
+   - Routes define where packets go, while routing rules define when a specific table must be used.
+
+   - Purpose of the Routes
+     - ```bash
+       10.1.0.0/24 table=100 and table=200
+       ```
+       Ensures local subnet awareness within each routing table.
+     - ```bash
+       0.0.0.0/0 10.1.0.1 table=100 and table=200
+       ```
+       Defines the default gateway per interface.
+     - ```bash
+       10.1.0.0/24 table=254
+       ```
+       Keeps the main table aware of the subnet so Linux can select a source address before policy routing takes effect.
+
+     - Static /32 routes
+       Force communication between secondary NICs to remain on eth1.
+
+   - Purpose of the Routing Rules
+     - ```bash
+       priority 100 from <eth0-ip> table 100
+       ```
+       Traffic originating from eth0 from the first server, it uses routing table 100.
+     - ```bash
+       priority 100 to <eth0-ip> table 100
+       ```
+       Replies to eth0 stay symmetric from the first server.
+     - ```bash
+       priority 200 from <eth1-ip> table 200
+       ```
+       Traffic originating from eth1 from the second server. It uses routing table 200.
+     - ```bash
+       priority 200 to <eth1-ip> table 200
+       ```
+       Ensures symmetric return path on eth1 from the second server.
+     - ```bash
+       priority 150 to <peer-eth1-ip> table 200
+       ```
+       Forces traffic destined to the peer secondary interface through eth1.
+
+  This design guarantees deterministic routing behavior while keeping Accelerated Networking fully active.
+
+### Configuration Overview
+  - This configuration creates:
+      - Routing table 100 for eth0
+      - Routing table 200 for eth1
+      - Source-based routing rules
+      - Destination-based rules for linear traffic between servers
+      - MTU increased only on eth1
+  - Traffic behavior:
+      - Requests entering eth0 exit eth0
+      - Requests entering eth1 exit eth1
+      - Direct communication between secondary NICs remains isolated
+
+### Client VM Configuration Steps
+  - Configure Routing Table for eth0
+    ```bash
+    nmcli connection modify "System eth0" ipv4.route-table 100
+    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
+    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
+    nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
+    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.5/32 table 100"
+    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.5/32 table 100"
+    nmcli connection down "System eth0" && nmcli connection up "System eth0"
+    ```
+
+  - Configure Routing Table for eth1
+    ```bash
+    nmcli connection modify "System eth1" ipv4.route-table 200
+    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
+    nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.6/32 table 200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.6/32 table 200"
+    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.7/32 10.1.0.1 99 table=200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.7/32 table 200"
+    nmcli connection modify "System eth1" mtu 3900
+    nmcli connection down "System eth1" && nmcli connection up "System eth1"
+    ```
+
+### Webserver VM Configuration Steps
+  - Configure Routing Table for eth0
+    ```bash
+    nmcli connection modify "System eth0" ipv4.route-table 100
+    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
+    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
+    nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
+    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.4/32 table 100"
+    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.4/32 table 100"
+    nmcli connection down "System eth0" && nmcli connection up "System eth0"
+    ```
+
+  - Configure Routing Table for eth1
+    ```bash
+    nmcli connection modify "System eth1" ipv4.route-table 200
+    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
+    nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.7/32 table 200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.7/32 table 200"
+    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.4/32 10.1.0.1 99 table=200"
+    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.6/32 table 200"
+    nmcli connection modify "System eth1" mtu 3900
+    nmcli connection down "System eth1" && nmcli connection up "System eth1"
+    ```
+
+### Validation
+
+  - After applying the configuration, verify routing behavior:
+    ```bash
+    ip address show
+    ip route show
+    ip rule show
+    ( nmcli connection show "System eth0" && nmcli  conn show "System eth1" ) | egrep "ipv4.routes|ipv4.routing"
+    ```
+  - MTU and Connectivity Testing Using Ping
+     - From the webserver:
+       ```bash
+       ping 10.1.0.6 -c 10 -M do -s 3872
+       ```
+     - From the client:
+       ```bash
+       ping 10.1.0.5 -c 10 -M do -s 3872
+       ```
+
+     - While making the ping test, capture traffic to confirm packets traverse the secondary interface in both servers
+       ```bash
+       tcpdump -i eth1
+       ```
+     - Expected behavior:
+         - No packet fragmentation
+         - Successful replies
+         - Confirms MTU alignment and Accelerated Networking path usage
+
+
+> **Notes:**
+  - Accelerated Networking must be enabled on both NICs before increasing MTU.
+  - MTU changes apply only to traffic within the same VNet.
+  - Only the secondary NIC uses jumbo frames in this exercise.
+  - This technique demonstrates a fully NetworkManager-based multinic configuration without modifying system routing scripts.
