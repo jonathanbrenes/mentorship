@@ -434,8 +434,25 @@ This exercise mirrors real Azure support and production scenarios.
          - No packet fragmentation
          - Successful replies
          - Confirms MTU alignment and Accelerated Networking path usage
-
-
+  - Testing webserver Using HTTP
+     - From the client
+       ```bash
+       curl  10.1.0.4
+       curl  10.1.0.7
+       ```
+    - Expected behavior
+      Traffic using IP address on eth0 will return from the eth0 on the other server
+      Traffic using IP address on eth1 will return from the eth1 on the other server
+      
+      ```bash
+      # curl  10.1.0.4
+      Client IP (source):  10.1.0.5
+      Server IP (listener): 10.1.0.4
+      # curl  10.1.0.7
+      Client IP (source):  10.1.0.6
+      Server IP (listener): 10.1.0.7
+      ```
+      
 > **Notes:**
   - Accelerated Networking must be enabled on both NICs before increasing MTU.
   - MTU changes apply only to traffic within the same VNet.
