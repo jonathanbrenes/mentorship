@@ -6,7 +6,7 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork001.json)
 - Capture traffic on port 80. Access the VM public IP from a webbrowser, once the test is done, hit ```Ctrl-C``` to stop the capture
   ``` bash
-  tcpdump -i any port 80 and not host 168.63.129.16 # Captures network traffic on port 80 from all interfaces while excluding traffic from the IP address 168.63.129.16 which could be sending health probes to the VM.
+   tcpdump -i any port 80 and not host 168.63.129.16 # Captures network traffic on port 80 from all interfaces while excluding traffic from the IP address 168.63.129.16 which could be sending health probes to the VM.
   ```
 
   > **Note:** The parameter ```-w``` can be used to save the capture in a pcap file. Caoture the file!
@@ -16,8 +16,8 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
 - Install wireshark on your windows
   
   Open a cmd prompt on windows and install wireshark using winget
-  ```batch
-  winget install wireshark
+  ``` cmd
+   winget install wireshark
   ```
   > **Note:** This will open a pop out window asking for permission. Please accept it!
 
@@ -25,7 +25,7 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
 
 - Make another capture again with tcpdump, don't use any filter this time. Access the webserver again, click refresh few times. Access the VM public IP from a webbrowser, once the test is done, hit ```Ctrl-C``` to stop the capture
   ``` bash
-  tcpdump -w mycapture2.pcap -i any port 80 # Captures network traffic on port 80 from all interfaces.
+   tcpdump -w mycapture2.pcap -i any port 80 # Captures network traffic on port 80 from all interfaces.
   ```
 
 - Download the new file on windows
@@ -53,10 +53,10 @@ Deploy this VM. This will automatically create a SLES VM that will be configure 
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
 - Check network configuration
   Important commands
-  ```bash
-  ip address show
-  ip route show
-  ip rule show
+  ``` bash
+   ip address show
+   ip route show
+   ip rule show
   ```
 - Attach secondary NIC to VM
   Power off the VM, attach network interface. There is already a created network interface on the same resource group. Power on the VM
@@ -68,10 +68,10 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork003.json)
 - Check network configuration
   Important commands
-  ```bash
-  ip address show
-  ip route show
-  ip rule show
+  ``` bash
+   ip address show
+   ip route show
+   ip rule show
   ```
 - Attach secondary NIC to VM
   
@@ -127,10 +127,10 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
       - Confirm SR‑IOV is present
 
     Commands to run:
-    ```bash
-    ip link show
-    lspci
-    ethtool -i <interface>
+    ``` bash
+     ip link show
+     lspci
+     ethtool -i <interface>
     ```
 
     Expected result:
@@ -140,10 +140,10 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 ### Part 2: Validate Initial Network State
   - Before any changes, inspect the routing and addressing.
     Run on both VMs:
-    ```bash
-    ip address show
-    ip route show
-    ip rule show
+    ``` bash
+     ip address show
+     ip route show
+     ip rule show
     ```
 
     Observation:
@@ -211,8 +211,8 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
     - Persist MTU configuration using NetworkManager
 
   Validation commands:
-  ```bash
-  ip link show
+  ``` bash
+   ip link show
   ```
 
 
@@ -248,6 +248,8 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
 
 This exercise mirrors real Azure support and production scenarios.
 
+---
+
 ## Alternative Multinic Configuration Using NetworkManager Policy Routing (RHEL 9)
 ### Objective
   - This section describes an alternative multinic configuration technique using NetworkManager policy-based routing.
@@ -266,17 +268,17 @@ This exercise mirrors real Azure support and production scenarios.
   - Before configuring routing tables, students must identify the IP address assigned to each NIC.
     Run the following command on both virtual machines:
 	 
-       ```bash
- 	   ip a | grep eth
+       ``` bash
+ 	    ip a | grep eth
  	   ```
 
     Example output:
     
-       ```bash
-       2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
-       inet 10.1.0.5/24 scope global eth0
-       3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
-       inet 10.1.0.6/24 scope global eth1
+       ``` bash
+        2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
+        inet 10.1.0.5/24 scope global eth0
+        3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
+        inet 10.1.0.6/24 scope global eth1
        ```
     **Important:** Record both addresses for later routing rules
       - eth0 = primary NIC
@@ -286,8 +288,8 @@ This exercise mirrors real Azure support and production scenarios.
 
 ### Rename Secondary Network Profile
   - In Azure deployments, the second interface may appear as Wired connection 1.
-    ```bash
-    nmcli connection modify "Wired connection 1" connection.id "System eth1"
+    ``` bash
+     nmcli connection modify "Wired connection 1" connection.id "System eth1"
     ```
     
 ### Why Routes and Routing Rules Are Required
@@ -305,43 +307,43 @@ This exercise mirrors real Azure support and production scenarios.
    - Routes define where packets go, while routing rules define when a specific table must be used.
 
    - Purpose of the Routes
-     - ```bash
-       10.1.0.0/24 table=100 and table=200
+     - ``` bash
+        10.1.0.0/24 table=100 and table=200 # Ensures local subnet awareness within each routing table.
        ```
-       Ensures local subnet awareness within each routing table.
-     - ```bash
-       0.0.0.0/0 10.1.0.1 table=100 and table=200
+       
+     - ``` bash
+        0.0.0.0/0 10.1.0.1 table=100 and table=200 # Defines the default gateway per interface.
        ```
-       Defines the default gateway per interface.
-     - ```bash
-       10.1.0.0/24 table=254
+       
+     - ``` bash
+        10.1.0.0/24 table=254 # Keeps the main table aware of the subnet so Linux can select a source address before policy routing takes effect.
        ```
-       Keeps the main table aware of the subnet so Linux can select a source address before policy routing takes effect.
+       
 
      - Static /32 routes
        Force communication between secondary NICs to remain on eth1.
 
    - Purpose of the Routing Rules
-     - ```bash
-       priority 100 from <eth0-ip> table 100
+     - ``` bash
+        priority 100 from <eth0-ip> table 100 # Traffic originating from eth0 from the first server, it uses routing table 100.
        ```
-       Traffic originating from eth0 from the first server, it uses routing table 100.
-     - ```bash
-       priority 100 to <eth0-ip> table 100
+       
+     - ``` bash
+        priority 100 to <eth0-ip> table 100 # Replies to eth0 stay symmetric from the first server.
        ```
-       Replies to eth0 stay symmetric from the first server.
-     - ```bash
-       priority 200 from <eth1-ip> table 200
+       
+     - ``` bash
+        priority 200 from <eth1-ip> table 200 # Traffic originating from eth1 from the second server. It uses routing table 200.
        ```
-       Traffic originating from eth1 from the second server. It uses routing table 200.
-     - ```bash
-       priority 200 to <eth1-ip> table 200
+       
+     - ``` bash
+        priority 200 to <eth1-ip> table 200 # Ensures symmetric return path on eth1 from the second server.
        ```
-       Ensures symmetric return path on eth1 from the second server.
-     - ```bash
-       priority 150 to <peer-eth1-ip> table 200
+       
+     - ``` bash
+        priority 150 to <peer-eth1-ip> table 200 # Forces traffic destined to the peer secondary interface through eth1.
        ```
-       Forces traffic destined to the peer secondary interface through eth1.
+       
 
   This design guarantees deterministic routing behavior while keeping Accelerated Networking fully active.
 
@@ -360,51 +362,51 @@ This exercise mirrors real Azure support and production scenarios.
 ### Client VM Configuration Steps
   - Configure Routing Table for eth0
     ```bash
-    nmcli connection modify "System eth0" ipv4.route-table 100
-    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
-    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
-    nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
-    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.5/32 table 100"
-    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.5/32 table 100"
-    nmcli connection down "System eth0" && nmcli connection up "System eth0"
+     nmcli connection modify "System eth0" ipv4.route-table 100
+     nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
+     nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
+     nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
+     nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.5/32 table 100"
+     nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.5/32 table 100"
+     nmcli connection down "System eth0" && nmcli connection up "System eth0"
     ```
 
   - Configure Routing Table for eth1
     ```bash
-    nmcli connection modify "System eth1" ipv4.route-table 200
-    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
-    nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.6/32 table 200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.6/32 table 200"
-    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.7/32 10.1.0.1 99 table=200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.7/32 table 200"
-    nmcli connection modify "System eth1" mtu 3900
-    nmcli connection down "System eth1" && nmcli connection up "System eth1"
+     nmcli connection modify "System eth1" ipv4.route-table 200
+     nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
+     nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.6/32 table 200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.6/32 table 200"
+     nmcli connection modify "System eth1" +ipv4.routes "10.1.0.7/32 10.1.0.1 99 table=200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.7/32 table 200"
+     nmcli connection modify "System eth1" mtu 3900
+     nmcli connection down "System eth1" && nmcli connection up "System eth1"
     ```
 
 ### Webserver VM Configuration Steps
   - Configure Routing Table for eth0
     ```bash
-    nmcli connection modify "System eth0" ipv4.route-table 100
-    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
-    nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
-    nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
-    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.4/32 table 100"
-    nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.4/32 table 100"
-    nmcli connection down "System eth0" && nmcli connection up "System eth0"
+     nmcli connection modify "System eth0" ipv4.route-table 100
+     nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=100"
+     nmcli connection modify "System eth0" +ipv4.routes "10.1.0.0/24 table=254"
+     nmcli connection modify "System eth0" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=100"
+     nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 from 10.1.0.4/32 table 100"
+     nmcli connection modify "System eth0" +ipv4.routing-rules "priority 100 to 10.1.0.4/32 table 100"
+     nmcli connection down "System eth0" && nmcli connection up "System eth0"
     ```
 
   - Configure Routing Table for eth1
     ```bash
-    nmcli connection modify "System eth1" ipv4.route-table 200
-    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
-    nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.7/32 table 200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.7/32 table 200"
-    nmcli connection modify "System eth1" +ipv4.routes "10.1.0.4/32 10.1.0.1 99 table=200"
-    nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.6/32 table 200"
-    nmcli connection modify "System eth1" mtu 3900
-    nmcli connection down "System eth1" && nmcli connection up "System eth1"
+     nmcli connection modify "System eth1" ipv4.route-table 200
+     nmcli connection modify "System eth1" +ipv4.routes "10.1.0.0/24 table=200"
+     nmcli connection modify "System eth1" +ipv4.routes "0.0.0.0/0 10.1.0.1 table=200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 from 10.1.0.7/32 table 200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 200 to 10.1.0.7/32 table 200"
+     nmcli connection modify "System eth1" +ipv4.routes "10.1.0.4/32 10.1.0.1 99 table=200"
+     nmcli connection modify "System eth1" +ipv4.routing-rules "priority 150 to 10.1.0.6/32 table 200"
+     nmcli connection modify "System eth1" mtu 3900
+     nmcli connection down "System eth1" && nmcli connection up "System eth1"
     ```
 
 ### Validation
@@ -418,17 +420,17 @@ This exercise mirrors real Azure support and production scenarios.
     ```
   - MTU and Connectivity Testing Using Ping
      - From the webserver:
-       ```bash
-       ping 10.1.0.6 -c 10 -M do -s 3872
+       ``` bash
+        ping 10.1.0.6 -c 10 -M do -s 3872 # Sends 10 echo requests, do enforces Path MTU discovery without allowing fragmentation, and sets the ICMP payload size to test jumbo-frame MTU connectivity.
        ```
      - From the client:
-       ```bash
-       ping 10.1.0.5 -c 10 -M do -s 3872
+       ``` bash
+        ping 10.1.0.5 -c 10 -M do -s 3872 # Sends 10 echo requests, do enforces Path MTU discovery without allowing fragmentation, and sets the ICMP payload size to test jumbo-frame MTU connectivity.
        ```
 
      - While making the ping test, capture traffic to confirm packets traverse the secondary interface in both servers
-       ```bash
-       tcpdump -i eth1
+       ``` bash
+        tcpdump -i eth1
        ```
      - Expected behavior:
          - No packet fragmentation
@@ -436,21 +438,21 @@ This exercise mirrors real Azure support and production scenarios.
          - Confirms MTU alignment and Accelerated Networking path usage
   - Testing webserver Using HTTP
      - From the client
-       ```bash
-       curl  10.1.0.4
-       curl  10.1.0.7
+       ``` bash
+        curl  10.1.0.4
+        curl  10.1.0.7
        ```
     - Expected behavior
       Traffic using IP address on eth0 will return from the eth0 on the other server
       Traffic using IP address on eth1 will return from the eth1 on the other server
       
-      ```bash
-      # curl  10.1.0.4
-      Client IP (source):  10.1.0.5
-      Server IP (listener): 10.1.0.4
-      # curl  10.1.0.7
-      Client IP (source):  10.1.0.6
-      Server IP (listener): 10.1.0.7
+      ``` bash
+       # curl  10.1.0.4
+       Client IP (source):  10.1.0.5
+       Server IP (listener): 10.1.0.4
+       # curl  10.1.0.7
+       Client IP (source):  10.1.0.6
+       Server IP (listener): 10.1.0.7
       ```
       
 > **Notes:**
