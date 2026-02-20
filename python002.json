@@ -1,0 +1,260 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1.14562",
+      "templateHash": "16607361201936431976"
+    }
+  },
+  "parameters": {
+    "vmName": {
+      "type": "string",
+      "defaultValue": "python002",
+      "metadata": {
+        "description": "The VM name for your Virtual Machines."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "secureString",
+      "metadata": {
+        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v6",
+      "metadata": {
+        "description": "The size of the VM."
+      }
+    }
+  },
+  "functions": [],
+  "variables": {
+    "osDiskType": "StandardSSD_LRS",
+    "imagePublisher": "RedHat",
+    "imageOffer": "RHEL",
+    "imageSKU": "9-lvm-gen2",
+    "imageVersion": "latest",
+    "location": "[resourceGroup().location]",
+    "virtualNetworkName": "[format('{0}vnet', parameters('vmName'))]",
+    "addressPrefix": "10.1.0.0/16",
+    "subnetName": "[format('{0}subnet', parameters('vmName'))]",
+    "subnetAddressPrefix": "10.1.0.0/24",
+    "networkSecurityGroupName": "[format('{0}NSG', parameters('vmName'))]",
+    "networkInterfaceName": "[format('{0}NetInt', parameters('vmName'))]",
+    "publicIPAddressName": "[format('{0}PublicIP', parameters('vmName'))]",
+    "dnsLabelPrefix": "[concat(parameters('vmName'), uniqueString(resourceGroup().id))]",
+    "customData": "IyEvYmluL2Jhc2gKY2F0IDw8IEVPRiA+PiAvdmFyL3RtcC9kYXRhLnR4dAoxNjMgMTQ1IDE2NCAxNDUgMTU2IDE0NiAxNTcgMTYyIDE0MyAxNDUgMDQwIDA2MCAwMTIgMTYzIDE0NSAxNDQKMDQwIDA1NSAxNTEgMDQwIDA0MCAwNDcgMTYzIDA1NyAxNDUgMTU2IDE0NiAxNTcgMTYyIDE0MyAxNTEgMTU2CjE0NyAwNTcgMTYwIDE0NSAxNjIgMTU1IDE1MSAxNjMgMTYzIDE1MSAxNjYgMTQ1IDA1NyAxNDcgMDQ3IDA0MAowNTcgMTQ1IDE2NCAxNDMgMDU3IDE2MyAxNDUgMTU0IDE1MSAxNTYgMTY1IDE3MCAwNTcgMTQzIDE1NyAxNTYKMTQ2IDE1MSAxNDcgMDEyIDE0NCAxNTYgMTQ2IDA0MCAwNTUgMTcxIDA0MCAxNTEgMTU2IDE2MyAxNjQgMTQxCjE1NCAxNTQgMDQwIDE2MCAxNzEgMTY0IDE1MCAxNTcgMTU2IDA2MyAwNTYgMDYxIDA2MiAwNDAgMTQ3IDE0MwoxNDMgMDEyIDE2MyAxNjUgMTQ0IDE1NyAwNDAgMTQxIDE1NCAxNjQgMTQ1IDE2MiAxNTYgMTQxIDE2NCAxNTEKMTY2IDE0NSAxNjMgMDQwIDA1NSAwNTUgMTUxIDE1NiAxNjMgMTY0IDE0MSAxNTQgMTU0IDA0MCAwNTcgMTY1CjE2MyAxNjIgMDU3IDE0MiAxNTEgMTU2IDA1NyAxNjAgMTcxIDE2NCAxNTAgMTU3IDE1NiAwNjMgMDQwIDE2MAoxNzEgMTY0IDE1MCAxNTcgMTU2IDA2MyAwNDAgMDU3IDE2NSAxNjMgMTYyIDA1NyAxNDIgMTUxIDE1NiAwNTcKMTYwIDE3MSAxNjQgMTUwIDE1NyAxNTYgMDYzIDA1NiAwNjEgMDYyIDA0MCAwNjIgMDYwIDAxMiAxNjMgMTY1CjE0NCAxNTcgMDQwIDE0MSAxNTQgMTY0IDE0NSAxNjIgMTU2IDE0MSAxNjQgMTUxIDE2NiAxNDUgMTYzIDA0MAowNTUgMDU1IDE1MSAxNTYgMTYzIDE2NCAxNDEgMTU0IDE1NCAwNDAgMDU3IDE2NSAxNjMgMTYyIDA1NyAxNDIKMTUxIDE1NiAwNTcgMTYwIDE3MSAxNjQgMTUwIDE1NyAxNTYgMDYzIDA0MCAxNjAgMTcxIDE2NCAxNTAgMTU3CjE1NiAwNjMgMDQwIDA1NyAxNjUgMTYzIDE2MiAwNTcgMTQyIDE1MSAxNTYgMDU3IDE2MCAxNzEgMTY0IDE1MAoxNTcgMTU2IDA2MyAwNTYgMDcxIDA0MCAwNjEgMDYwIDAxMiAxNjMgMTY1IDE0NCAxNTcgMDQwIDE0MSAxNTQKMTY0IDE0NSAxNjIgMTU2IDE0MSAxNjQgMTUxIDE2NiAxNDUgMTYzIDA0MCAwNTUgMDU1IDE0MSAxNjUgMTY0CjE1NyAwNDAgMTYwIDE3MSAxNjQgMTUwIDE1NyAxNTYgMDYzIDAxMiAxNjMgMTY1IDE0NCAxNTcgMDQwIDE0MQoxNTQgMTY0IDE0NSAxNjIgMTU2IDE0MSAxNjQgMTUxIDE2NiAxNDUgMTYzIDA0MCAwNTUgMDU1IDE0NCAxNTEKMTYzIDE2MCAxNTQgMTQxIDE3MSAwNDAgMTYwIDE3MSAxNjQgMTUwIDE1NyAxNTYgMDYzIDAxMiAxNjcgMTQ3CjE0NSAxNjQgMDQwIDE1MCAxNjQgMTY0IDE2MCAxNjMgMDcyIDA1NyAwNTcgMTY3IDE2NyAxNjcgMDU2IDE2MAoxNzEgMTY0IDE1MCAxNTcgMTU2IDA1NiAxNTcgMTYyIDE0NyAwNTcgMTQ2IDE2NCAxNjAgMDU3IDE2MCAxNzEKMTY0IDE1MCAxNTcgMTU2IDA1NyAwNjMgMDU2IDA2MSAwNjUgMDU2IDA2MCAwNTcgMTIwIDE3MSAxNjQgMTUwCjE1NyAxNTYgMDU1IDA2MyAwNTYgMDYxIDA2NSAwNTYgMDYwIDE0MSAwNjYgMDU2IDE2NCAxNDcgMTcyIDAxMgoxNjQgMTQxIDE2MiAwNDAgMTcwIDE0NiAwNDAgMTIwIDE3MSAxNjQgMTUwIDE1NyAxNTYgMDU1IDA2MyAwNTYKMDYxIDA2NSAwNTYgMDYwIDE0MSAwNjYgMDU2IDE2NCAxNDcgMTcyIDAxMiAxNDMgMTQ0IDA0MCAxMjAgMTcxCjE2NCAxNTAgMTU3IDE1NiAwNTUgMDYzIDA1NiAwNjEgMDY1IDA1NiAwNjAgMTQxIDA2NiAwMTIgMDU2IDA1NwoxNDMgMTU3IDE1NiAxNDYgMTUxIDE0NyAxNjUgMTYyIDE0NSAwNDAgMDU1IDE2MSAwNDAgMDU1IDA1NSAxNDQKMTUxIDE2MyAxNDEgMTQyIDE1NCAxNDUgMDU1IDE2NCAxNDUgMTYzIDE2NCAwNTUgMTU1IDE1NyAxNDQgMTY1CjE1NCAxNDUgMTYzIDA0MCAwNTUgMDU1IDE2MCAxNjIgMTQ1IDE0NiAxNTEgMTcwIDA3NSAwNTcgMTY1IDE2MwoxNjIgMDEyIDE1NSAxNDEgMTUzIDE0NSAwNDAgMDU1IDE2MyAwNDAgMDU1IDE1MiAwNDAgMDYyIDAxMiAxNTUKMTQxIDE1MyAxNDUgMDQwIDE1MSAxNTYgMTYzIDE2NCAxNDEgMTU0IDE1NCAwNDAgMDU1IDE2MyAwNDAgMDU1CjE1MiAwNDAgMDYyIDAxMiAxNDMgMTYwIDA0MCAwNTUgMTQ2IDA0MCAwNTcgMTY1IDE2MyAxNjIgMDU3IDE0MgoxNTEgMTU2IDA1NyAxNjAgMTcxIDE2NCAxNTAgMTU3IDE1NiAwNjMgMDU2IDA2MSAwNjUgMDQwIDA1NyAxNjUKMTYzIDE2MiAwNTcgMTQyIDE1MSAxNTYgMDU3IDE2MCAxNzEgMTY0IDE1MCAxNTcgMTU2IDA2MyAwNTYgMDcxCkVPRgoKYXdrICd7IGZvcihpPTE7aTw9TkY7aSsrKSBwcmludGYgIiVjIiwgc3RydG9udW0oIjAiJGkpIH0nIC92YXIvdG1wL2RhdGEudHh0IHwgc2gKc2xlZXAgNQpzaHV0ZG93biAtciBub3c="
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('networkInterfaceName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+      ]
+    },
+        {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dnsLabelPrefix')]"
+        },
+        "idleTimeoutInMinutes": 4
+      }
+    },
+     {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "inbound_ssh",
+            "properties": {
+              "access": "Allow",
+              "description": "Inbound SSH access to port 22.",
+              "destinationAddressPrefix": "VirtualNetwork",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 100,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-101",
+            "properties": {
+              "access": "Allow",
+              "description": "CSS Governance Security Rule.  Allow vnet inbound.  https://aka.ms/casg",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 101,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "VirtualNetwork",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-102",
+            "properties": {
+              "access": "Allow",
+              "description": "CSS Governance Security Rule.  Allow Corpnet inbound.  https://aka.ms/casg",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "*",
+              "direction": "Inbound",
+              "priority": 102,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "CorpNetPublic",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "CASG-Rule-103",
+            "properties": {
+              "access": "Allow",
+              "description": "AllowTagSSHInbound",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 103,
+              "protocol": "*",
+              "provisioningState": "Succeeded",
+              "sourceAddressPrefix": "AzureCloud",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}/{1}', variables('virtualNetworkName'), variables('subnetName'))]",
+      "properties": {
+        "addressPrefix": "[variables('subnetAddressPrefix')]",
+        "privateEndpointNetworkPolicies": "Enabled",
+        "privateLinkServiceNetworkPolicies": "Enabled",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-03-01",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('osDiskType')]"
+            }
+          },
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "[variables('imageVersion')]"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]",  
+              "properties": { "primary": true }
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "customData": "[variables('customData')]"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    },
+    "Server": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn]"
+    }
+  }
+}
