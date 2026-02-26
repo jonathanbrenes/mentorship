@@ -544,7 +544,6 @@ sudo mkdir -p /media/nfs /media/smb
 
   Validate install and services:
   ```bash
-  mount.aznfs -h
   systemctl status aznfswatchdog* --no-pager
   ```
 
