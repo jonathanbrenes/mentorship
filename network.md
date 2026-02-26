@@ -460,3 +460,209 @@ This exercise mirrors real Azure support and production scenarios.
   - MTU changes apply only to traffic within the same VNet.
   - Only the secondary NIC uses jumbo frames in this exercise.
   - This technique demonstrates a fully NetworkManager-based multinic configuration without modifying system routing scripts.
+
+---
+
+## Multi-OS Storage Exercise: NFS (aznfs + standard NFS) and SMB
+
+### Objective
+- Deploy one **RHEL**, one **Ubuntu**, and one **SLES** VM from the previous JSON template.
+- Use two storage accounts created by the template:
+  - One for **NFS**
+  - One for **SMB**
+- Mount NFS first using **aznfs**, then using **standard NFS client mount**.
+- Validate what is required to add and mount the SMB share.
+
+### Deploy the Environment
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork005.json)
+
+### Environment Assumptions (from the previous JSON)
+- 3 Linux VMs:
+  - `rhel-vm`
+  - `ubuntu-vm`
+  - `sles-vm`
+- Storage account for NFS and an NFS-enabled share/container path.
+- Storage account for SMB and an SMB file share.
+- Network path from all VMs to storage endpoints (DNS + routing + NSG/firewall rules).
+
+### Part 1: Install Required Client Packages
+
+- On **RHEL**
+  ```bash
+  sudo dnf install -y nfs-utils cifs-utils
+  ```
+
+- On **Ubuntu**
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y nfs-common cifs-utils
+  ```
+
+- On **SLES**
+  ```bash
+  sudo zypper refresh
+  sudo zypper install -y nfs-client cifs-utils
+  ```
+
+Create local mount points on each VM:
+```bash
+sudo mkdir -p /media/nfs /media/smb
+```
+
+### Part 2: Mount NFS Using aznfs (first method)
+
+> Use this method first. It uses the Azure NFS mount helper.
+
+1. Install aznfs helper on each VM.
+
+  On **Ubuntu**:
+  ```bash
+  curl -sSL -O https://packages.microsoft.com/config/$(source /etc/os-release && echo "$ID/$VERSION_ID")/packages-microsoft-prod.deb
+  sudo dpkg -i packages-microsoft-prod.deb
+  rm packages-microsoft-prod.deb
+  sudo apt-get update
+  sudo apt-get install aznfs
+  ```
+
+  On **RHEL**:
+  ```bash
+  curl -sSL -O https://packages.microsoft.com/config/$(source /etc/os-release && echo "$ID/${VERSION_ID%%.*}")/packages-microsoft-prod.rpm
+  sudo rpm -i packages-microsoft-prod.rpm
+  rm packages-microsoft-prod.rpm
+  sudo yum update
+  sudo yum install aznfs
+  ```
+
+  On **SLES**:
+  ```bash
+  curl -sSL -O https://packages.microsoft.com/config/$(source /etc/os-release && echo "$ID/${VERSION_ID%%.*}")/packages-microsoft-prod.rpm
+  sudo rpm -i packages-microsoft-prod.rpm
+  rm packages-microsoft-prod.rpm
+  sudo zypper refresh
+  sudo zypper in aznfs
+  ```
+
+  Validate install and services:
+  ```bash
+  mount.aznfs -h
+  systemctl status aznfswatchdog* --no-pager
+  ```
+
+2. Mount the NFS export using aznfs.
+
+Generic example (replace placeholders with values from your environment):
+```bash
+sudo mount -t aznfs -o vers=4.1 <nfsStorageAccountName>.file.core.windows.net:/<nfsStorageAccountName>/nfsshare /media/nfs
+```
+
+From this template:
+- Share folder is static: `nfsshare`
+- Storage account value comes from deployment output: `nfsStorageAccountName`
+
+Validation:
+```bash
+mount | grep nfs
+df -h | grep /media/nfs
+sudo touch /media/nfs/test-aznfs-$(hostname)
+ls -l /media/nfs
+```
+
+Persistency test (optional):
+- Add the persistent aznfs entry according to helper documentation.
+- Reboot and validate mount is present.
+
+### Part 3: Mount NFS Using Standard NFS Client (second method)
+
+Unmount aznfs first (if mounted):
+```bash
+sudo umount /media/nfs
+```
+
+Mount with native NFS tooling:
+```bash
+sudo mount -t nfs -o vers=4,minorversion=1,sec=sys <nfsStorageAccountName>.file.core.windows.net:/<nfsStorageAccountName>/nfsshare /media/nfs
+```
+
+Validation:
+```bash
+mount | grep /media/nfs
+df -h | grep /media/nfs
+sudo touch /media/nfs/test-native-$(hostname)
+ls -l /media/nfs
+```
+
+Optional `/etc/fstab` entry pattern:
+```fstab
+<nfsStorageAccountName>.file.core.windows.net:/<nfsStorageAccountName>/nfsshare /media/nfs nfs vers=4,minorversion=1,sec=sys,_netdev,nofail 0 0
+```
+
+### Part 4: Requirements to Add the SMB Share
+
+Before mounting SMB on Linux VMs, ensure all prerequisites are met:
+
+1. **Protocol and OS support**
+   - SMB 3.x capable clients.
+   - `cifs-utils` installed (already done in Part 1).
+
+2. **Network access to SMB endpoint**
+   - TCP **445** must be allowed from VM to storage endpoint.
+   - Name resolution must resolve the storage account SMB FQDN.
+   - If private endpoint is used, private DNS zone/link must be correct.
+
+3. **Authentication method**
+   - One of the following must be configured:
+     - Storage account key (lab/simple scenario)
+     - Microsoft Entra ID / AD DS / Entra DS (enterprise scenario)
+
+       > **Warning:** Even though `allowSharedKeyAccess` is set in the ARM template, a subscription policy can still flip this setting.
+       > - Check **Allow storage account key access** in the storage account configuration.
+       > - If you enable it and after clicking refresh it goes back to disabled, you were most likely blocked by policy.
+
+4. **Secure transport and policy alignment**
+   - SMB encryption/signing requirements must match account policy.
+   - Any firewall or NSG controls must explicitly allow storage traffic.
+
+5. **Share permissions + NTFS/ACL alignment**
+   - Share-level permissions are not enough alone in identity-based setups.
+   - File/directory ACLs must allow the target user/group.
+
+### Part 5: Mount SMB Share on Linux
+
+Create a credential file (recommended for key-based lab setup):
+```bash
+sudo bash -c 'cat > /etc/smbcredentials/<smbStorageAccountName>.cred <<EOF
+username=<smbStorageAccountName>
+password=<SMB_ACCOUNT_KEY>
+EOF'
+sudo chmod 600 /etc/smbcredentials/<smbStorageAccountName>.cred
+```
+
+Mount command example:
+```bash
+sudo mount -t cifs //<smbStorageAccountName>.file.core.windows.net/smbshare /media/smb \
+  -o vers=3.1.1,credentials=/etc/smbcredentials/<smbStorageAccountName>.cred,serverino,dir_mode=0770,file_mode=0660,mfsymlinks,actimeo=30
+```
+
+From this template:
+- Share folder is static: `smbshare`
+- Storage account value comes from deployment output: `smbStorageAccountName`
+
+Validation:
+```bash
+mount | grep /media/smb
+df -h | grep /media/smb
+sudo touch /media/smb/test-smb-$(hostname)
+ls -l /media/smb
+```
+
+Optional `/etc/fstab` entry pattern:
+```fstab
+//<smbStorageAccountName>.file.core.windows.net/smbshare /media/smb cifs nofail,_netdev,vers=3.1.1,credentials=/etc/smbcredentials/<smbStorageAccountName>.cred,serverino,dir_mode=0770,file_mode=0660,mfsymlinks,actimeo=30 0 0
+```
+
+### Expected Outcomes
+- Students can mount NFS from all three distributions using:
+  - aznfs helper
+  - standard native NFS mount
+- Students understand the SMB prerequisites (network, auth, policy, permissions).
+- Students successfully mount SMB and validate cross-VM read/write behavior.
