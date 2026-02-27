@@ -1,0 +1,335 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser"
+    },
+    "adminPassword": {
+      "type": "secureString"
+    },
+    "ultraAvailabilityZone": {
+      "type": "string",
+      "defaultValue": "1",
+      "allowedValues": [
+        "1",
+        "2",
+        "3"
+      ],
+      "metadata": {
+        "description": "Availability Zone used when UltraSSD_LRS or PremiumV2_LRS requires zonal placement."
+      }
+    }
+  },
+  "variables": {
+    "vnetName": "labVnet",
+    "subnetName": "default",
+    "nsgName": "labNsg",
+    "addressPrefix": "10.1.0.0/16",
+    "subnetPrefix": "10.1.0.0/24"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "inbound_ssh_azurecloud",
+            "properties": {
+              "access": "Allow",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "priority": 100,
+              "sourceAddressPrefix": "AzureCloud",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          },
+          {
+            "name": "inbound_custom_1_tcp_80",
+            "properties": {
+              "access": "Allow",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "priority": 200,
+              "sourceAddressPrefix": "Internet",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "inbound_custom_2_udp_53",
+            "properties": {
+              "access": "Allow",
+              "protocol": "Udp",
+              "direction": "Inbound",
+              "priority": 201,
+              "sourceAddressPrefix": "AzureCloud",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "53"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-05-01",
+      "name": "[variables('vnetName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2024-05-01",
+      "name": "[format('{0}/{1}', variables('vnetName'), variables('subnetName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      ],
+      "properties": {
+        "addressPrefix": "[variables('subnetPrefix')]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "name": "node001-nic1-pip",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": {
+          "domainNameLabel": "[concat('node001-nic1', uniqueString(resourceGroup().id))]"
+        }
+      },
+      "zones": [
+        "[parameters('ultraAvailabilityZone')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-05-01",
+      "name": "node001-nic1",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', 'node001-nic1-pip')]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+      ],
+      "properties": {
+        "enableAcceleratedNetworking": false,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'node001-nic1-pip')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-03-01",
+      "name": "node001",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', 'node001-nic1')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_E2bds_v5"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "RedHat",
+            "offer": "RHEL-HA",
+            "sku": "8_8",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS"
+            }
+          },
+          "dataDisks": [
+            {
+              "lun": 0,
+              "createOption": "Empty",
+              "diskSizeGB": 128,
+              "managedDisk": {
+                "storageAccountType": "PremiumV2_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', 'node001-nic1')]",
+              "properties": {
+                "primary": true
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "node001",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "zones": [
+        "[parameters('ultraAvailabilityZone')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "name": "node002-nic1-pip",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": {
+          "domainNameLabel": "[concat('node002-nic1', uniqueString(resourceGroup().id))]"
+        }
+      },
+      "zones": [
+        "[parameters('ultraAvailabilityZone')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2024-05-01",
+      "name": "node002-nic1",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', 'node002-nic1-pip')]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+      ],
+      "properties": {
+        "enableAcceleratedNetworking": false,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('subnetName'))]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'node002-nic1-pip')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-03-01",
+      "name": "node002",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', 'node002-nic1')]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "Standard_E2bds_v5"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "RedHat",
+            "offer": "RHEL-HA",
+            "sku": "8_8",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS"
+            }
+          },
+          "dataDisks": [
+            {
+              "lun": 0,
+              "createOption": "Empty",
+              "diskSizeGB": 128,
+              "managedDisk": {
+                "storageAccountType": "PremiumV2_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', 'node002-nic1')]",
+              "properties": {
+                "primary": true
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "node002",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "customData": "Y2F0ID4+IC9ldGMvc2VjdXJpdHkvbGltaXRzLmNvbmYgPDwnRU9GJwoKIyAtLS0gTEFCOiBicmVhayBTU0ggdXNlciBzZXNzaW9ucyAtLS0KKiAgICAgICBzb2Z0ICAgIG5vZmlsZSAgICAgIDE2CiogICAgICAgaGFyZCAgICBub2ZpbGUgICAgICAzMgoqICAgICAgIHNvZnQgICAgbnByb2MgICAgICAgOAoqICAgICAgIGhhcmQgICAgbnByb2MgICAgICAgMTYKRU9GCmNhdCA+IC9ldGMvc3lzdGVtZC9zeXN0ZW0vc3NoZC5zZXJ2aWNlLmQvbGltaXRzLmNvbmYgPDwnRU9GJwpbU2VydmljZV0KTGltaXROT0ZJTEU9MgpMaW1pdE5QUk9DPTEKRU9GCnJwbSAtZSBgcnBtIC1xYSB8IGdyZXAga2VybmVsIHwgZ3JlcCAtdiAkKHVuYW1lIC1yKWAKY2F0ID4gL2V0Yy9zeXN0ZW1kL3N5c3RlbS5jb25mIDw8J0VPRicKW01hbmFnZXJdCkRlZmF1bHRMaW1pdE5PRklMRT02NDAwMApEZWZhdWx0TGltaXROUFJPQz02NDAwMApEZWZhdWx0TGltaXRTVEFDSz0xMDI0MApEZWZhdWx0TGltaXRTSUdQRU5ESU5HPTUwNDMyMwpFT0YKCmRyYWN1dCAtZgoKCnNsZWVwIDYwICYmIHJlYm9vdCAm"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      },
+      "zones": [
+        "[parameters('ultraAvailabilityZone')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "vmFqdns": {
+      "type": "array",
+      "value": [
+        "[reference(resourceId('Microsoft.Network/publicIPAddresses', 'node001-nic1-pip')).dnsSettings.fqdn]",
+        "[reference(resourceId('Microsoft.Network/publicIPAddresses', 'node002-nic1-pip')).dnsSettings.fqdn]"
+      ]
+    }
+  }
+}
