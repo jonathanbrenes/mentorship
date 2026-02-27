@@ -8,18 +8,6 @@
     },
     "adminPassword": {
       "type": "secureString"
-    },
-    "ultraAvailabilityZone": {
-      "type": "string",
-      "defaultValue": "1",
-      "allowedValues": [
-        "1",
-        "2",
-        "3"
-      ],
-      "metadata": {
-        "description": "Availability Zone used when UltraSSD_LRS or PremiumV2_LRS requires zonal placement."
-      }
     }
   },
   "variables": {
@@ -121,10 +109,7 @@
         "dnsSettings": {
           "domainNameLabel": "[concat('node001-nic1', uniqueString(resourceGroup().id))]"
         }
-      },
-      "zones": [
-        "[parameters('ultraAvailabilityZone')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -178,16 +163,7 @@
               "storageAccountType": "StandardSSD_LRS"
             }
           },
-          "dataDisks": [
-            {
-              "lun": 0,
-              "createOption": "Empty",
-              "diskSizeGB": 128,
-              "managedDisk": {
-                "storageAccountType": "PremiumV2_LRS"
-              }
-            }
-          ]
+          "dataDisks": []
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -209,10 +185,7 @@
             "enabled": true
           }
         }
-      },
-      "zones": [
-        "[parameters('ultraAvailabilityZone')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
@@ -228,10 +201,7 @@
         "dnsSettings": {
           "domainNameLabel": "[concat('node002-nic1', uniqueString(resourceGroup().id))]"
         }
-      },
-      "zones": [
-        "[parameters('ultraAvailabilityZone')]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -285,16 +255,7 @@
               "storageAccountType": "StandardSSD_LRS"
             }
           },
-          "dataDisks": [
-            {
-              "lun": 0,
-              "createOption": "Empty",
-              "diskSizeGB": 128,
-              "managedDisk": {
-                "storageAccountType": "PremiumV2_LRS"
-              }
-            }
-          ]
+          "dataDisks": []
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -310,17 +271,14 @@
           "computerName": "node002",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
-          "customData": "Y2F0ID4+IC9ldGMvc2VjdXJpdHkvbGltaXRzLmNvbmYgPDwnRU9GJwoKIyAtLS0gTEFCOiBicmVhayBTU0ggdXNlciBzZXNzaW9ucyAtLS0KKiAgICAgICBzb2Z0ICAgIG5vZmlsZSAgICAgIDE2CiogICAgICAgaGFyZCAgICBub2ZpbGUgICAgICAzMgoqICAgICAgIHNvZnQgICAgbnByb2MgICAgICAgOAoqICAgICAgIGhhcmQgICAgbnByb2MgICAgICAgMTYKRU9GCmNhdCA+IC9ldGMvc3lzdGVtZC9zeXN0ZW0vc3NoZC5zZXJ2aWNlLmQvbGltaXRzLmNvbmYgPDwnRU9GJwpbU2VydmljZV0KTGltaXROT0ZJTEU9MgpMaW1pdE5QUk9DPTEKRU9GCnJwbSAtZSBgcnBtIC1xYSB8IGdyZXAga2VybmVsIHwgZ3JlcCAtdiAkKHVuYW1lIC1yKWAKY2F0ID4gL2V0Yy9zeXN0ZW1kL3N5c3RlbS5jb25mIDw8J0VPRicKW01hbmFnZXJdCkRlZmF1bHRMaW1pdE5PRklMRT02NDAwMApEZWZhdWx0TGltaXROUFJPQz02NDAwMApEZWZhdWx0TGltaXRTVEFDSz0xMDI0MApEZWZhdWx0TGltaXRTSUdQRU5ESU5HPTUwNDMyMwpFT0YKCmRyYWN1dCAtZgoKCnNsZWVwIDYwICYmIHJlYm9vdCAm"
+          "customData": "IyEvYmluL2Jhc2gKY2F0ID4+IC9ldGMvc2VjdXJpdHkvbGltaXRzLmNvbmYgPDwnRU9GJwoKIyAtLS0gTEFCOiBicmVhayBTU0ggdXNlciBzZXNzaW9ucyAtLS0KKiAgICAgICBzb2Z0ICAgIG5vZmlsZSAgICAgIDE2CiogICAgICAgaGFyZCAgICBub2ZpbGUgICAgICAzMgoqICAgICAgIHNvZnQgICAgbnByb2MgICAgICAgOAoqICAgICAgIGhhcmQgICAgbnByb2MgICAgICAgMTYKRU9GCmNhdCA+IC9ldGMvc3lzdGVtZC9zeXN0ZW0vc3NoZC5zZXJ2aWNlLmQvbGltaXRzLmNvbmYgPDwnRU9GJwpbU2VydmljZV0KTGltaXROT0ZJTEU9MgpMaW1pdE5QUk9DPTEKRU9GCnJwbSAtZSBgcnBtIC1xYSB8IGdyZXAga2VybmVsIHwgZ3JlcCAtdiAkKHVuYW1lIC1yKWAKY2F0ID4gL2V0Yy9zeXN0ZW1kL3N5c3RlbS5jb25mIDw8J0VPRicKW01hbmFnZXJdCkRlZmF1bHRMaW1pdE5PRklMRT02NDAwMApEZWZhdWx0TGltaXROUFJPQz02NDAwMApEZWZhdWx0TGltaXRTVEFDSz0xMDI0MApEZWZhdWx0TGltaXRTSUdQRU5ESU5HPTUwNDMyMwpFT0YKCmRyYWN1dCAtZgoKCnNsZWVwIDYwICYmIHJlYm9vdCAm"
         },
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true
           }
         }
-      },
-      "zones": [
-        "[parameters('ultraAvailabilityZone')]"
-      ]
+      }
     }
   ],
   "outputs": {
