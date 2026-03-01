@@ -68,6 +68,28 @@ Service limits, overrides, boot targets, and production-style service debugging.
 - [Network](https://github.com/jonathanbrenes/mentorship/blob/main/network.md)
 - [Python](https://github.com/jonathanbrenes/mentorship/blob/main/python.md)
 - [Recovery](https://github.com/jonathanbrenes/mentorship/blob/main/recovery.md)
+
+## Cheatsheets
+
+Quick-reference command guides for cross-distribution Linux administration.
+
+These are designed to support the hands-on exercises and provide fast lookup for common operational tasks.
+
+📘 **Cheatsheets Index:**  
+https://github.com/jonathanbrenes/mentorship/tree/main/cheatsheets
+
+Includes:
+
+- APT (Debian / Ubuntu)
+- DPKG
+- DNF / YUM (RHEL family)
+- RPM
+- Zypper (SUSE)
+- VI / VIM
+
+Use these as companion material while working through the mentorship labs.
+
+
 - [SELinux](https://github.com/jonathanbrenes/mentorship/blob/main/selinux.md)
 - [Storage](https://github.com/jonathanbrenes/mentorship/blob/main/storage.md)
 - [Systemd](https://github.com/jonathanbrenes/mentorship/blob/main/systemd.md)
