@@ -18,7 +18,7 @@ These cheatsheets are designed for:
 
 > High-level package manager (repository-based)
 
-🔗 [APT Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_apt.md)
+🔗 [APT Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_apt.md)
 
 Covers:
 - Repository update & refresh
@@ -34,7 +34,7 @@ Covers:
 
 > Low-level Debian package management (.deb files)
 
-🔗 [DPKG Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_dpkg.md)
+🔗 [DPKG Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_dpkg.md)
 
 Covers:
 - Install local `.deb`
@@ -52,7 +52,7 @@ Covers:
 
 > Repository-based package manager (modern RHEL family)
 
-🔗 [DNF / YUM Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_dnfyum.md)
+🔗 [DNF / YUM Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_dnfyum.md)
 
 Covers:
 - Install / remove packages
@@ -68,7 +68,7 @@ Covers:
 
 > Low-level package manager (.rpm files)
 
-🔗 [RPM Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_rpm.md)
+🔗 [RPM Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_rpm.md)
 
 Covers:
 - Install local RPM
@@ -86,7 +86,7 @@ Covers:
 
 > Repository-based package manager for SUSE systems
 
-🔗 [Zypper Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_zypper.md)
+🔗 [Zypper Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_zypper.md)
 
 Covers:
 - Install / remove packages
@@ -102,7 +102,7 @@ Covers:
 
 ## VI / VIM
 
-🔗 [VI Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheet_vi.md)
+🔗 [VI Cheatsheet](https://github.com/jonathanbrenes/mentorship/blob/main/cheatsheets/cheatsheet_vi.md)
 
 Covers:
 - Modes (normal, insert, visual, command)
