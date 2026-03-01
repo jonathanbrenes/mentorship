@@ -1,9 +1,163 @@
+# Network Lab Collection: Packet Capture, Multinic, MTU, and Multi-OS Storage on Azure
+
+## Title and Scenario
+
+This lab collection builds practical Linux networking and storage troubleshooting muscle using Azure virtual machines. You will capture and inspect HTTP traffic, study multinic behavior across distributions, validate Accelerated Networking and MTU behavior in Azure, and mount Azure Files using both NFS and SMB from multiple Linux distributions.
+
+The exercises are designed to mimic day-to-day operational tasks: gathering evidence, validating behavior, and producing repeatable documentation of what you observed.
+
+## Deployment
+
+Deploy the required environments using the following templates:
+
+- Packet Capture: Webserver VM (port 80)
+
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork001.json)
+- Multinic configuration: SLES VM
+
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
+- Multinic configuration: RHEL VM
+
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork003.json)
+- Multinic + Accelerated Networking + MTU: RHEL 9 (webserver + client)
+
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork004.json)
+- Multi-OS Storage: RHEL + Ubuntu + SLES, NFS (aznfs + native) and SMB
+
+  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork005.json)
+
+## Skills Required
+
+- Capturing and inspecting network traffic using packet captures and filtering concepts
+- Understanding Linux interface, routing, and policy routing fundamentals
+- Reasoning about symmetric routing and multinic behavior in cloud environments
+- Validating MTU behavior (fragmentation, PMTU, and platform constraints)
+- Using distribution-native tooling across RHEL and SLES (and Ubuntu where applicable)
+- Mounting and validating NFS and SMB shares on Linux
+- Evidence-driven troubleshooting and clear operational documentation
+
+## Recommended Prerequisites
+
+- Comfortable with Linux shell usage, permissions, and basic network concepts (IP/subnet/gateway)
+- Familiarity with Azure fundamentals (VMs, NICs, VNets/subnets, NSGs)
+- Basic understanding of packet captures and what HTTP traffic looks like on the wire
+- Familiarity with storage protocols (NFS vs SMB) at a conceptual level
+
+## Objectives
+
+- Capture HTTP traffic, save it to a pcap file, and apply filtering concepts to review flows.
+- Observe multinic configuration behavior on SLES and RHEL under Azure, including how behavior changes after attaching an additional NIC.
+- Validate Accelerated Networking on Linux and understand how NIC type affects supported MTU.
+- Validate routing symmetry and MTU behavior using documented tests and capture evidence.
+- Mount Azure Files using NFS via `aznfs` and the native NFS client, then mount SMB with appropriate prerequisites and validation.
+
+## Environment Overview
+
+- Azure VMs deployed via ARM templates (see Deployment section)
+- Linux distributions involved across exercises:
+  - SLES
+  - RHEL 9
+  - Ubuntu (storage exercise)
+- Network primitives:
+  - Single-subnet VNet scenarios
+  - Multinic scenarios (primary + secondary NIC)
+  - Accelerated Networking where noted
+- Storage primitives (storage exercise):
+  - Azure Files over NFS
+  - Azure Files over SMB
+
+## Your Mission
+
+Work through each exercise in sequence, collecting evidence as you go. Your end state for each section is not “a fix,” but a documented set of observations and validation results demonstrating that you can:
+
+- capture, export, and inspect artifacts (pcaps, routing state, interface state)
+- reason about multinic and MTU behavior in Azure
+- validate storage connectivity and correct mounting behavior across multiple Linux OSes
+
+## Analytical Guidance
+
+- Prefer evidence over assumptions:
+  - collect captures and command outputs before forming conclusions
+  - repeat tests after changes to validate what changed and what did not
+- Use comparisons:
+  - before/after a NIC attach
+  - between SLES and RHEL behavior
+  - between primary and secondary NIC paths
+- Treat validation as a loop:
+  - run the test
+  - capture the evidence
+  - confirm expected behavior
+  - repeat after any environment change
+- For filtering and analysis:
+  - apply filters to reduce noise, then broaden when you need full context
+  - verify what interface/route is actually in use by correlating command output with traffic evidence
+
+## Validation Criteria
+
+- Packet Capture
+  - You produced at least one filtered capture and one unfiltered capture.
+  - You can demonstrate that the capture contains HTTP traffic corresponding to your browser refreshes.
+  - You can apply filtering concepts to isolate traffic of interest.
+
+- Multinic configuration
+  - You captured baseline network state and post-attach network state.
+  - You can describe the differences observed between SLES and RHEL behavior when adding a secondary NIC.
+
+- Multinic + Accelerated Networking + MTU
+  - You validated Accelerated Networking presence on both VMs.
+  - You validated initial routing state before changes.
+  - You performed MTU validation using the prescribed method(s) and can show evidence of success criteria (no fragmentation where required).
+
+- Multi-OS Storage (NFS + SMB)
+  - You mounted NFS using `aznfs` and validated read/write.
+  - You mounted NFS using native tooling and validated read/write.
+  - You validated SMB prerequisites and successfully mounted SMB with read/write validation.
+
+## Documentation Expectations
+
+Document your work as if handing it off to another engineer.
+
+Include:
+
+- What you deployed (which template(s))
+- What you observed (before/after states)
+- What evidence you collected (pcap names, command outputs, logs if relevant)
+- What validation you performed and what the outcomes were
+- Any platform constraints you discovered (e.g., MTU limitations based on NIC type)
+- Any open questions you would escalate, with supporting evidence
+
+## What Not To Do
+
+- Do not skip evidence collection steps.
+- Do not replace structured workflows with personal shortcuts if they reduce traceability.
+- Do not edit command blocks, inline comments, or tables from the lab instructions.
+- Do not interpret “validation” as a single run; repeat tests after environment changes.
+- Do not assume behavior is identical across distributions.
+
+## Real-World Context
+
+These exercises map to common operational work:
+
+- debugging connectivity and HTTP service behavior with packet captures
+- investigating asymmetric routing in multinic Linux hosts
+- validating performance-path requirements like Accelerated Networking and jumbo frames
+- dealing with cloud platform constraints (policies, MTU support, endpoint access)
+- mounting shared storage across heterogeneous Linux fleets
+
+## Optional Advanced Exploration
+
+- Capture additional evidence that correlates routing decisions with observed packet paths.
+- Compare outcomes when targeting public vs private IPs (where applicable) and document the differences.
+- Extend storage validation by checking cross-VM behavior (file ownership/permissions, latency observations) and documenting any protocol-specific differences.
+
+---
+
 # Network
 ## Packet Capture
 ### Create a server running a webserver
 Deploy this VM. This will automatically create a VM and set a webserver running on port 80
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork001.json)
+
+Deployment: See the Deployment section.
 - Capture traffic on port 80. Access the VM public IP from a webbrowser, once the test is done, hit ```Ctrl-C``` to stop the capture
   ``` bash
    tcpdump -i any port 80 and not host 168.63.129.16 # Captures network traffic on port 80 from all interfaces while excluding traffic from the IP address 168.63.129.16 which could be sending health probes to the VM.
@@ -14,7 +168,7 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
    tcpdump -w mycapture.pcap -i any port 80 and not host 168.63.129.16
   ```
 - Install wireshark on your windows
-  
+
   Open a cmd prompt on windows and install wireshark using winget
   ``` cmd
    winget install wireshark
@@ -29,9 +183,9 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
   ```
 
 - Download the new file on windows
-  
+
   Filtering is possible on wireshark
-  
+
   | **Filter Description**                           | **Wireshark Filter**                  |
   |--------------------------------------------------|---------------------------------------|
   | Filter traffic on port 80 (HTTP traffic)         | `tcp.port == 80`                      |
@@ -49,8 +203,8 @@ Deploy this VM. This will automatically create a VM and set a webserver running 
 
 ## Multinic configuration
 Deploy this VM. This will automatically create a SLES VM that will be configure for multinic.
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork002.json)
+
+Deployment: See the Deployment section.
 - Check network configuration
   Important commands
   ``` bash
@@ -64,8 +218,8 @@ Deploy this VM. This will automatically create a SLES VM that will be configure 
 - Check network configuration using the same commands
 
 Deploy another VM. This will automatically create a RHEL VM that will be configure for multinic.
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork003.json)
+
+Deployment: See the Deployment section.
 - Check network configuration
   Important commands
   ``` bash
@@ -74,11 +228,11 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
    ip rule show
   ```
 - Attach secondary NIC to VM
-  
+
   Power off the VM, attach network interface. There is already a created network interface on the same resource group. Power on the VM
 
 - Check network configuration using the same commands
-  
+
   >**Note:** Why this time network configuration doesn't look correct?
 
 - Setting multinic configuration on RHEL
@@ -110,7 +264,8 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
     - Server IP (destination)
 
 ### Deploy the Environment
-   [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork004.json)
+
+Deployment: See the Deployment section.
    - This template creates:
      - VNet, subnet, NSG
      - Two RHEL 9 VMs
@@ -151,7 +306,7 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
       - Secondary NIC is present but **not correctly routed**
       - This is expected behavior on RHEL before multinic configuration
 
-    
+
 ### Part 3: Multinic Configuration on RHEL 9
   - RHEL does **not** automatically configure multiple NIC routing correctly in Azure.
     Students must configure:
@@ -230,7 +385,7 @@ Deploy another VM. This will automatically create a RHEL VM that will be configu
       - No silent fragmentation occurs
       - Accelerated Networking remains in effect
 
-    
+
 
 ### Expected Outcomes
   - By the end of this exercise, students should be able to:
@@ -267,13 +422,13 @@ This exercise mirrors real Azure support and production scenarios.
 ### Determine Interface Addresses
   - Before configuring routing tables, students must identify the IP address assigned to each NIC.
     Run the following command on both virtual machines:
-	 
+
        ``` bash
  	    ip a | grep eth
  	   ```
 
     Example output:
-    
+
        ``` bash
         2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ...
         inet 10.1.0.5/24 scope global eth0
@@ -284,14 +439,14 @@ This exercise mirrors real Azure support and production scenarios.
       - eth0 = primary NIC
       - eth1 = secondary NIC used for accelerated intra-VNet communication
 
-    
+
 
 ### Rename Secondary Network Profile
   - In Azure deployments, the second interface may appear as Wired connection 1.
     ``` bash
      nmcli connection modify "Wired connection 1" connection.id "System eth1"
     ```
-    
+
 ### Why Routes and Routing Rules Are Required
   - Azure attaches multiple NICs to the same subnet, but Linux routing decisions are based on the main routing table by default.
   - Without policy routing:
@@ -310,15 +465,15 @@ This exercise mirrors real Azure support and production scenarios.
      - ``` bash
         10.1.0.0/24 table=100 and table=200 # Ensures local subnet awareness within each routing table.
        ```
-       
+
      - ``` bash
         0.0.0.0/0 10.1.0.1 table=100 and table=200 # Defines the default gateway per interface.
        ```
-       
+
      - ``` bash
         10.1.0.0/24 table=254 # Keeps the main table aware of the subnet so Linux can select a source address before policy routing takes effect.
        ```
-       
+
 
      - Static /32 routes
        Force communication between secondary NICs to remain on eth1.
@@ -327,23 +482,23 @@ This exercise mirrors real Azure support and production scenarios.
      - ``` bash
         priority 100 from <eth0-ip> table 100 # Traffic originating from eth0 from the first server, it uses routing table 100.
        ```
-       
+
      - ``` bash
         priority 100 to <eth0-ip> table 100 # Replies to eth0 stay symmetric from the first server.
        ```
-       
+
      - ``` bash
         priority 200 from <eth1-ip> table 200 # Traffic originating from eth1 from the second server. It uses routing table 200.
        ```
-       
+
      - ``` bash
         priority 200 to <eth1-ip> table 200 # Ensures symmetric return path on eth1 from the second server.
        ```
-       
+
      - ``` bash
         priority 150 to <peer-eth1-ip> table 200 # Forces traffic destined to the peer secondary interface through eth1.
        ```
-       
+
 
   This design guarantees deterministic routing behavior while keeping Accelerated Networking fully active.
 
@@ -445,7 +600,7 @@ This exercise mirrors real Azure support and production scenarios.
     - Expected behavior
       Traffic using IP address on eth0 will return from the eth0 on the other server
       Traffic using IP address on eth1 will return from the eth1 on the other server
-      
+
       ``` bash
        # curl  10.1.0.4
        Client IP (source):  10.1.0.5
@@ -454,7 +609,7 @@ This exercise mirrors real Azure support and production scenarios.
        Client IP (source):  10.1.0.6
        Server IP (listener): 10.1.0.7
       ```
-      
+
 > **Notes:**
   - Accelerated Networking must be enabled on both NICs before increasing MTU.
   - MTU changes apply only to traffic within the same VNet.
@@ -474,8 +629,8 @@ This exercise mirrors real Azure support and production scenarios.
 - Validate what is required to add and mount the SMB share.
 
 ### Deploy the Environment
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fnetwork005.json)
 
+Deployment: See the Deployment section.
 ### Environment Assumptions (from the previous JSON)
 - 3 Linux VMs:
   - `rhel-vm`
@@ -665,3 +820,4 @@ Optional `/etc/fstab` entry pattern:
   - standard native NFS mount
 - Students understand the SMB prerequisites (network, auth, policy, permissions).
 - Students successfully mount SMB and validate cross-VM read/write behavior.
+
