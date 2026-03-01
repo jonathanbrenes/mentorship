@@ -1,12 +1,175 @@
+## Title and Scenario
+
+This lab set focuses on practical Python operations and failure modes that Linux engineers commonly run into in production environments: performance differences across Python versions, isolated dependency management, and the risks of modifying “system Python” on enterprise distributions.
+
+You will work across SLES 15 and RHEL 9 scenarios. Some parts are benchmark-style (performance and virtual environments), while other parts are troubleshooting-style (Python-based tooling unexpectedly failing after changes to system Python integration).
+
+The goals are to build confidence with safe, supportable patterns (virtual environments) and to practice evidence-driven recovery when Python integration is broken on a running system.
+
+## Deployment
+
+Enhanced Performance in Python 3.6 vs 3.11 (SLES 15)
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython001.json)
+
+Python Troubleshooting Exercise – Broken Python on RHEL 9
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython002.json)
+
+Python Troubleshooting Exercise – Broken Python on SLES 15
+
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython003.json)
+
+## Skills Required
+
+- Basic Linux command line fluency (navigation, editing files, reading outputs)
+- Python version awareness (major/minor versions, how tools pick an interpreter)
+- Understanding of “system Python” vs application Python
+- Safe dependency isolation concepts (virtual environments)
+- Package-management thinking (what the OS owns vs what applications own)
+- Evidence-driven troubleshooting (verify assumptions, trace what is being executed, confirm impacts)
+
+## Recommended Prerequisites
+
+- Comfortable connecting to a VM via SSH and running commands
+- Familiarity with Python basics (running scripts, installing packages)
+- Conceptual understanding of:
+  - How the OS provides runtime dependencies (RPM/APT packages)
+  - Why distributions pin specific versions of core components
+
+## Objectives
+
+By the end of this lab set, you should be able to:
+
+- Demonstrate performance differences between Python runtimes using the same workload
+- Create and use isolated Python environments for different interpreter versions
+- Explain why enterprise distributions pin a specific “system Python” version
+- Diagnose why `python3` behavior becomes inconsistent on an enterprise Linux system
+- Restore a safe, supported Python integration approach (without reinstalling the OS)
+- Articulate preventive practices that avoid these failures in production
+
+## Environment Overview
+
+- Azure virtual machines deployed via provided templates
+- OS coverage:
+  - SLES 15 (Python 3.6 as system Python, with newer Python present for comparison)
+  - RHEL 9 (Python 3.9 as system Python, with additional versions installed)
+- Constraints:
+  - Treat these as production-like systems: avoid destructive “quick fixes”
+  - Do not reinstall the OS
+  - Use investigative work to understand what changed and why it matters
+
+## Your Mission
+
+Complete the exercises in order:
+
+1. Measure and observe Python 3.6 vs 3.11 runtime behavior on the same workload (SLES 15).
+2. Build isolated Python environments for multiple interpreter versions and confirm dependency separation.
+3. For each troubleshooting scenario (RHEL 9 and SLES 15), determine what is unsafe about the current Python integration and recover the system to a supported state without reinstalling the OS.
+
+Success means:
+- You can explain what you observed
+- You can reproduce your validation steps
+- The system behaves consistently and predictably after recovery
+
+## Analytical Guidance
+
+Use a disciplined workflow:
+
+- Identify what the OS expects to be true (system Python version and ownership)
+- Verify what is actually happening when you run `python3`
+- Trace the selection mechanism (PATH, symlinks, system tooling that selects the interpreter)
+- Confirm impact on Python-based tools and workflows
+- Restore supportability by aligning runtime selection with OS expectations and using isolation for non-system Python needs
+- Validate across reboots and repeated runs (consistency matters more than a single success)
+
+Favor approaches that:
+- Preserve package manager ownership
+- Avoid overwriting core binaries
+- Keep application Python separate from system Python
+
+## Validation Criteria
+
+You should be able to demonstrate the following outcomes, with evidence:
+
+- Performance exercise:
+  - The same benchmark script runs under both Python versions and produces output without errors
+  - The Python 3.11 run completes faster than Python 3.6 in a noticeable way (timing evidence)
+
+- Virtual environment exercise:
+  - Each virtual environment activates successfully
+  - `python3 --version` matches the expected interpreter for each environment
+  - `pip list` differs across environments until you intentionally install packages in each
+
+- Troubleshooting exercises (RHEL 9 and SLES 15):
+  - `python3` resolves consistently to the expected system Python for the OS
+  - Python-based workflows behave consistently (no “confusing” version behavior)
+  - Package integrity/ownership assumptions are restored (system binaries are managed by the OS)
+  - Recovery is stable across a reboot and re-validation
+
+## Documentation Expectations
+
+Document your work like a small incident report:
+
+- Summary
+  - What was broken, and what “broken” looked like (symptoms)
+- Evidence collected
+  - What you checked and what it showed (version output, selection path, ownership indicators)
+- Hypotheses tested
+  - Competing explanations and why you ruled them in/out
+- Recovery approach (high-level)
+  - What category of change restored correctness (no step-by-step fix instructions)
+- Validation proof
+  - Repeated checks, reboot confirmation, expected behavior restored
+- Preventive considerations
+  - How to avoid this class of failure in production
+
+## What Not To Do
+
+- Do not reinstall the OS
+- Do not overwrite system Python binaries (or their versioned variants)
+- Do not replace system-managed files under `/usr/bin` with custom builds
+- Do not treat “newer Python” as automatically safe for OS tooling
+- Do not apply changes without understanding package ownership and OS expectations
+
+## Real-World Context
+
+These scenarios map to common production incidents:
+
+- Performance pressure leading teams to upgrade runtimes without isolating dependencies
+- “Quick fixes” that replace `/usr/bin/python3` (or versioned binaries) and silently break OS tooling
+- Package-management integrity failures that only surface later (updates, configuration tools, automation)
+- Mixed Python versions on the same host causing non-deterministic behavior across scripts and utilities
+
+The correct production pattern is typically:
+- Keep system Python aligned with distribution support
+- Use virtual environments (or equivalent isolation) for application runtimes
+- Treat `/usr/bin` as OS-owned and protect package integrity
+
+## Optional Advanced Exploration
+
+- Compare different benchmark workloads (CPU-heavy vs IO-heavy) to see whether runtime gains vary
+- Investigate how different Linux tools on each distribution depend on Python (inventory the blast radius)
+- Evaluate operational guardrails:
+  - Configuration management checks preventing `/usr/bin` overwrites
+  - Monitoring to detect unexpected interpreter path changes
+  - Baseline integrity verification in CI/CD images
+- Consider how you would safely provide newer Python versions at scale:
+  - Per-application venvs
+  - Dedicated runtime directories under `/opt`
+  - Image-based deployments with clear ownership boundaries
+
+---
+
 # Python
 ## Enhanced Performance in Python 3.6 vs 3.11
 - Create a SLES 15 server which it will have python 3.6 and 3.11 
   Deploy this VM. This will automatically create a VM.
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython001.json)
-  
+
+  Deployment: See the Deployment section.
+
 - Demonstrating Enhanced Performance in Python 3.11 vs 3.6 Using an N-body Simulation Script
-  
+
   This will showcase the improved performance of Python 3.11 over Python 3.6 by running an extended N-body simulation. The script calculates the gravitational interactions between celestial bodies, providing a computationally intensive benchmark to highlight the efficiency gains in Python 3.11.
 - Execute the python script using different versions
   Use python 3.6 and 3.11 available on SLES 15
@@ -50,9 +213,9 @@
 
 Create a RHEL 9 server.
   This will automatically create a VM.
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython002.json)
-  
+
+  Deployment: See the Deployment section.
+
 ### Scenario
 
 A new RHEL 9.7 virtual machine has been deployed in Azure using an ARM template.  
@@ -136,9 +299,9 @@ By the end of this exercise, you should be able to explain:
 
 Create a SLES 15 server.
   This will automatically create a VM.
-  
-  [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fjonathanbrenes%2Fmentorship%2Frefs%2Fheads%2Fmain%2Fpython003.json)
-  
+
+  Deployment: See the Deployment section.
+
 ### Scenario
 
 A new **SLES 15 SP7** virtual machine has been deployed in Azure.
@@ -185,7 +348,7 @@ Nothing else should be assumed.
 - Many SUSE tools rely on Python 3.6 specifically
 - Replacing `/usr/bin/python3.6` bypasses package management
 - Installing custom builds into `/usr` overrides distribution ownership
-- The issue is **not Python 3.15** — it is **where and how it was installed**
+- The issue is **not** Python 3.15** — it is **where and how it was installed**
 
 
 ### Why This Is Dangerous
@@ -263,4 +426,3 @@ Investigate carefully. Fix deliberately.
 
 
 Take your time. Investigate. Fix it properly.
-
